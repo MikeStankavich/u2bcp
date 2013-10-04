@@ -1,0 +1,55 @@
+custom u2 uniobjects->custom idatareader->c# sqlbulkinsert
+
+object list
+U2 Connection
+Host
+? Port
+Login 
+Password
+account
+
+sql connection
+Host 
+? Port
+Login 
+pass
+? trusted
+database
+
+source file
+name
+columns[]
+
+mapping
+source location
+destination column
+transform
+
+dest table
+name
+columns[]
+
+column
+name
+type
+length
+null
+multivalue Y/N
+
+
+odds n ends
+multivalue mapped as single behavior - default to concat separated by \n, or truncate
+sqlize column names by replacing non \w chars with _ and trimming any leading, append seq # to resolve dups
+may be able to formulate type from U2 format code
+default type is varchar(8000)
+no idea on encoding maybe 8859? defer for now
+can we create table from SV and MV indicators?
+We should allow MV groupings, I.E M1 = 1st group, M2 = 2nd group. This allows case where
+multiple sub tables live in same file. 
+
+
+
+ok here we go mini sprint style
+do i need wrapper object for connections or just use natives?
+figure out a properties file so dont have to string out all details on command line
+figure out how to specify and store column mapping

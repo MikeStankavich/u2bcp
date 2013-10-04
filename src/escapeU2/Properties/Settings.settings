@@ -1,0 +1,39 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="escapeU2.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="U2Host" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pmsteel.kwyk.net</Value>
+    </Setting>
+    <Setting Name="U2Port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">31438</Value>
+    </Setting>
+    <Setting Name="U2Login" Type="System.String" Scope="User">
+      <Value Profile="(Default)">administrator</Value>
+    </Setting>
+    <Setting Name="U2Password" Type="System.String" Scope="User">
+      <Value Profile="(Default)">H!carb0n</Value>
+    </Setting>
+    <Setting Name="U2Account" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\BAI.PROD\PM</Value>
+    </Setting>
+    <Setting Name="SqlHost" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pmsteel.kwyk.net</Value>
+    </Setting>
+    <Setting Name="SqlPort" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1433</Value>
+    </Setting>
+    <Setting Name="SqlLogin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pmsteel</Value>
+    </Setting>
+    <Setting Name="SqlPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">H!carb0n</Value>
+    </Setting>
+    <Setting Name="SqlDatabase" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pmsteel</Value>
+    </Setting>
+    <Setting Name="Verbose" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
