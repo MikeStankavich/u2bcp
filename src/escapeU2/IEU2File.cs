@@ -5,7 +5,4 @@ using System.Text;
 
 namespace escapeU2
 {
-    public interface IEU2Table
-    {
-    }
 }

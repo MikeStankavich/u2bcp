@@ -109,6 +109,15 @@ namespace escapeU2
             }
 
         }
+        public void Connect(string Host, string Login, string Password, string Catalog)
+        {
+            this.host = Host;
+            this.login = Login;
+            this.password = Password;
+            this.catalog = Catalog;
+
+            this.Connect();
+        }
 
         public void Disconnect()
         {
@@ -117,6 +126,11 @@ namespace escapeU2
                 isconnected = false;
                 UniObjects.CloseSession(uSession);
             }
+        }
+        
+        public U2DataReader GetReader(string fileName)
+        {
+            return new U2DataReader(uSession, fileName);
         }
 
         ~U2Conn()

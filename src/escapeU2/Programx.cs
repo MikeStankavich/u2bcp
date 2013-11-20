@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Linq;
-using System.Data.SqlClient;
 using IBMU2.UODOTNET;
 
 namespace escapeU2
@@ -20,78 +19,10 @@ namespace escapeU2
         static void Main(string[] args)
         {
             bool debug = Properties.Settings.Default.Verbose;
-
-            try
-            {
-                U2Conn srcConn = new U2Conn();
-                srcConn.Connect(Properties.Settings.Default.U2Host
-                    ,Properties.Settings.Default.U2Login
-                    ,Properties.Settings.Default.U2Password
-                    ,Properties.Settings.Default.U2Account);
-
-                U2DataReader srcReader = srcConn.GetReader(Properties.Settings.Default.U2File);
-
-                string connectString =  string.Format("Server={0};User Id={1};Password={2};;Database={3};"
-                                             , Properties.Settings.Default.SqlHost // "pmsteel.kwyk.net"
-                                             , Properties.Settings.Default.SqlLogin  // "pmsteel"
-                                             , Properties.Settings.Default.SqlPassword // "H!carb0n"
-                                             , Properties.Settings.Default.SqlDatabase // "pmsteel"
-                                             );
-                SqlConnection destConn = new SqlConnection(connectString);
-                destConn.Open();
-
-                string sql = "exec prc_prep_table '" + Properties.Settings.Default.SqlTable + "', " + srcReader.FieldCount;
-                using (SqlCommand cmd = destConn.CreateCommand())
-                {
-                    cmd.CommandText = "exec prc_prep_table '" + Properties.Settings.Default.SqlTable + "', " + srcReader.FieldCount;
-                    cmd.ExecuteNonQuery();
-                }
-
-                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(destConn))
-                {
-                    bulkCopy.DestinationTableName = Properties.Settings.Default.SqlTable;
-                    bulkCopy.BatchSize = 100;
-                    bulkCopy.NotifyAfter = 100;
-                    // Set up the event handler to notify after 50 rows.
-                    bulkCopy.SqlRowsCopied += new SqlRowsCopiedEventHandler(OnSqlRowsCopied);
-                    bulkCopy.WriteToServer(srcReader);
-                }
-
-                /*
-                while (srcReader.Read())
-                {
-                    debugPrint(debug, srcReader.GetValue(0).ToString() + ", ");
-                    debugPrint(debug, srcReader.GetValue(1).ToString() + ", ");
-                    debugPrint(debug, srcReader.GetValue(14).ToString() + ", ");
-                    debugPrint(debug, srcReader.GetValue(15).ToString() + ", ");
-                    debugPrint(debug, srcReader.GetValue(16).ToString() + "\n");
-                }
-                */
-
-                srcReader.Close();
-
-                srcConn.Disconnect();
-            }
-            catch (Exception e)
-            {
-                debugPrint(true, "Error: " + e);
-                Console.ReadKey();
-            }
             
-            return;
-        }
-        private static void OnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
-        {
-            Console.WriteLine("Copied {0} so far...", e.RowsCopied);
-        }
-
-        private void WipBox()
-        {
-            bool debug = Properties.Settings.Default.Verbose;
-
             U2Conn srcConn = new U2Conn();
             SqlConn destConn = new SqlConn();
-
+            
             srcConn.Host = Properties.Settings.Default.U2Host; // "pmsteel.kwyk.net";
             srcConn.Login = Properties.Settings.Default.U2Login; // "administrator";
             srcConn.Password = Properties.Settings.Default.U2Password; // "H!carb0n";
@@ -117,16 +48,16 @@ namespace escapeU2
             */
 
             String sqlStmt = "";
-
+            
             try
             {
                 // every thing runs out of the UniSession instance.
                 UniSession uSession = null;
 
                 //Set up variables.
-                uSession = UniObjects.OpenSession(Properties.Settings.Default.U2Host, Properties.Settings.Default.U2Login,
+                uSession = UniObjects.OpenSession(Properties.Settings.Default.U2Host, Properties.Settings.Default.U2Login, 
                                                   Properties.Settings.Default.U2Password, Properties.Settings.Default.U2Account);
-
+                
                 debugPrint(debug, "U2 openSession succeeded\n");
 
                 debugPrint(debug, "Status = " + uSession.Status + "\n");
@@ -143,7 +74,7 @@ namespace escapeU2
                 UniSelectList usl = uSession.CreateUniSelectList(8);
 
                 StreamWriter sw = new StreamWriter(@"c:\temp\u2rl.xml");
-
+                        
                 usl.Select(uf);
                 while (!usl.LastRecordRead)
                 {
@@ -187,62 +118,62 @@ namespace escapeU2
                 //while (!usl.IsLastRecordRead)
                 //while (null != udaRow)
                 //{
-                //String usKey = udaRow.Extract(1).ToString();
-                //Properties.Settings.Default.SqlTable = usKey;
-                //debugPrint(debug, "key: " + usKey + "\n");
-                //debugPrint(debug, usKey.ToString() + ": " + Properties.Settings.Default.SqlTable);
-                //sqlStmt = "IF EXISTS (SELECT * FROM sys.tables WHERE OBJECT_ID('dbo.[" + Properties.Settings.Default.SqlTable + "]') IS NOT NULL) DROP TABLE dbo.[" + Properties.Settings.Default.SqlTable + "]";
-                //debugPrint(debug, sqlStmt);
-                //stmt.executeUpdate(sqlStmt);
-                //sqlStmt = "CREATE TABLE dbo.[" + Properties.Settings.Default.SqlTable + "] (ID varchar(255) NOT NULL,LOC smallint NOT NULL,SEQ smallint NOT NULL,VAL varchar(8000) NOT NULL)";
-                //debugPrint(debug, sqlStmt);
-                //stmt.executeUpdate(sqlStmt);
+                    //String usKey = udaRow.Extract(1).ToString();
+                    //Properties.Settings.Default.SqlTable = usKey;
+                    //debugPrint(debug, "key: " + usKey + "\n");
+                    //debugPrint(debug, usKey.ToString() + ": " + Properties.Settings.Default.SqlTable);
+                    //sqlStmt = "IF EXISTS (SELECT * FROM sys.tables WHERE OBJECT_ID('dbo.[" + Properties.Settings.Default.SqlTable + "]') IS NOT NULL) DROP TABLE dbo.[" + Properties.Settings.Default.SqlTable + "]";
+                    //debugPrint(debug, sqlStmt);
+                    //stmt.executeUpdate(sqlStmt);
+                    //sqlStmt = "CREATE TABLE dbo.[" + Properties.Settings.Default.SqlTable + "] (ID varchar(255) NOT NULL,LOC smallint NOT NULL,SEQ smallint NOT NULL,VAL varchar(8000) NOT NULL)";
+                    //debugPrint(debug, sqlStmt);
+                    //stmt.executeUpdate(sqlStmt);
 
-                //{{ int valIdx = 1; int fldIdx = 1;
-                //for (int fldIdx = 1; fldIdx <= udaRow.Dcount(); fldIdx++)
-                //{
-                //    debugPrint(debug, "field: " + udaRow.Extract(fldIdx).ToString());
-                //    for (int valIdx = 1; valIdx <= udaRow.dcount(fldIdx); valIdx++)
-                //    {
-                //        UniString usValue = udaRow.extract(fldIdx, valIdx);
-                //        debugPrint(debug, usValue.ToString());
-                //    }
-                //}
+                    //{{ int valIdx = 1; int fldIdx = 1;
+                    //for (int fldIdx = 1; fldIdx <= udaRow.Dcount(); fldIdx++)
+                    //{
+                    //    debugPrint(debug, "field: " + udaRow.Extract(fldIdx).ToString());
+                    //    for (int valIdx = 1; valIdx <= udaRow.dcount(fldIdx); valIdx++)
+                    //    {
+                    //        UniString usValue = udaRow.extract(fldIdx, valIdx);
+                    //        debugPrint(debug, usValue.ToString());
+                    //    }
+                    //}
 
-                //UniFile ufTblFile = uSession.open(usKey);
-                //debugPrint(debug, "file opened");
-                ////debugPrint(debug, usKey.ToString());
+                    //UniFile ufTblFile = uSession.open(usKey);
+                    //debugPrint(debug, "file opened");
+                    ////debugPrint(debug, usKey.ToString());
 
-                //UniSelectList uslTblList = uSession.selectList(2);
+                    //UniSelectList uslTblList = uSession.selectList(2);
 
-                //uslTblList.select(ufTblFile);
-                //UniString usTblKey = uslTblList.next();
-                //int cnt = 0;
+                    //uslTblList.select(ufTblFile);
+                    //UniString usTblKey = uslTblList.next();
+                    //int cnt = 0;
 
-                //while (!uslTblList.isLastRecordRead())
-                //{
+                    //while (!uslTblList.isLastRecordRead())
+                    //{
 
-                //    if (cnt++ % 1000 == 0) debugPrint(debug, "rows: " + cnt);
-                //    //debugPrint(debug, usTblKey.ToString());
-                //    UniDynArray udaTblRow = new UniDynArray(ufTblFile.read(usTblKey));
+                    //    if (cnt++ % 1000 == 0) debugPrint(debug, "rows: " + cnt);
+                    //    //debugPrint(debug, usTblKey.ToString());
+                    //    UniDynArray udaTblRow = new UniDynArray(ufTblFile.read(usTblKey));
 
-                //    for (int fldTblIdx = 1; fldTblIdx <= udaTblRow.dcount(); fldTblIdx++)
-                //    {
-                //        for (int valTblIdx = 1; valTblIdx <= udaTblRow.dcount(fldTblIdx); valTblIdx++)
-                //        {
-                //            UniString usTblValue = udaTblRow.extract(fldTblIdx, valTblIdx);
-                //            //debugPrint(debug, usTblValue.ToString());
-                //            sqlStmt = "INSERT [" + Properties.Settings.Default.SqlTable + "] VALUES ('" + usTblKey.ToString().replace("'", "''") + "', " + fldTblIdx + ", " + valTblIdx + ", '" + usTblValue.ToString().replace("'", "''") + "')";
+                    //    for (int fldTblIdx = 1; fldTblIdx <= udaTblRow.dcount(); fldTblIdx++)
+                    //    {
+                    //        for (int valTblIdx = 1; valTblIdx <= udaTblRow.dcount(fldTblIdx); valTblIdx++)
+                    //        {
+                    //            UniString usTblValue = udaTblRow.extract(fldTblIdx, valTblIdx);
+                    //            //debugPrint(debug, usTblValue.ToString());
+                    //            sqlStmt = "INSERT [" + Properties.Settings.Default.SqlTable + "] VALUES ('" + usTblKey.ToString().replace("'", "''") + "', " + fldTblIdx + ", " + valTblIdx + ", '" + usTblValue.ToString().replace("'", "''") + "')";
 
-                //            //debugPrint(debug, sqlStmt);
-                //            //stmt.executeUpdate(sqlStmt);
+                    //            //debugPrint(debug, sqlStmt);
+                    //            //stmt.executeUpdate(sqlStmt);
 
-                //        }
-                //    }
-                //    usTblKey = uslTblList.next();
-                //}
+                    //        }
+                    //    }
+                    //    usTblKey = uslTblList.next();
+                    //}
 
-                //udaRow = uSession.CreateUniDynArray(usl.Next());
+                    //udaRow = uSession.CreateUniDynArray(usl.Next());
                 //}
                 /*
                 udaKeys = usl.readList();
@@ -282,7 +213,7 @@ namespace escapeU2
                 */
                 uf.Close();
                 debugPrint(debug, Properties.Settings.Default.U2File + " file closed\n");
-
+                
                 // did we connect?
 
                 debugPrint(debug, "U2 Disconnected\n");

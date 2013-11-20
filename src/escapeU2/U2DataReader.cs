@@ -2,15 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Data;
+using System.Xml.Linq;
+using IBMU2.UODOTNET;
 
 namespace escapeU2
 {
     public class U2DataReader : IDataReader
     {
+        private UniFile uFile;
+        private UniSelectList usl;
+        private String key;
+        UniDynArray udaRow;
+
+        // constructor
+        public U2DataReader(UniSession uSession, string fileName)
+        {
+            uFile = uSession.CreateUniFile(fileName);
+            usl = uSession.CreateUniSelectList(8);
+            usl.Select(uFile);
+
+            // read a row to set field count, etc
+            if (this.Read())
+            {
+                // reset back to the beginning of the list to align to .NET behavior
+                usl.ClearList();
+                usl.Select(uFile);
+            }   
+        }
+        ~U2DataReader()
+        {
+            //this.Close();
+        }
+
         public void Close()
         {
-            throw new NotImplementedException();
+            if (uFile.IsFileOpen)
+                uFile.Close();
         }
 
         public int Depth
@@ -35,7 +64,14 @@ namespace escapeU2
 
         public bool Read()
         {
-            throw new NotImplementedException();
+            key = "";
+            while (!usl.LastRecordRead && "" == key)
+                key = usl.Next();
+
+            if ("" != key)
+                udaRow = uFile.Read(key);
+
+            return !usl.LastRecordRead;
         }
 
         public int RecordsAffected
@@ -50,7 +86,7 @@ namespace escapeU2
 
         public int FieldCount
         {
-            get { throw new NotImplementedException(); }
+            get { return udaRow.Dcount() + 1; }
         }
 
         public bool GetBoolean(int i)
@@ -105,7 +141,7 @@ namespace escapeU2
 
         public Type GetFieldType(int i)
         {
-            throw new NotImplementedException();
+            return System.Type.GetType("String");
         }
 
         public float GetFloat(int i)
@@ -135,7 +171,10 @@ namespace escapeU2
 
         public string GetName(int i)
         {
-            throw new NotImplementedException();
+            if (0 == i)
+                return "id";
+            else
+                return string.Format("loc{0}", i);
         }
 
         public int GetOrdinal(string name)
@@ -150,7 +189,63 @@ namespace escapeU2
 
         public object GetValue(int i)
         {
-            throw new NotImplementedException();
+            String value = null;
+
+            try
+            {
+
+                if (0 == i)
+                    value = key;
+                else
+                {
+                    string fld = udaRow.Extract(i).ToString();
+                    if ("" != fld)
+                    {
+                        XElement xf = new XElement("fld" /*, new XAttribute("loc", i) */);
+                        for (int v = 1; v <= udaRow.Dcount(i); v++)
+                        {
+                            /*
+                            XElement xv = new XElement("val", new XAttribute("loc", v));
+                            string val = udaRow.Extract(i, v).ToString();
+                            if ("" != val)
+                            {
+                                for (int s = 1; s <= udaRow.Dcount(i, v); s++)
+                                {
+                                    xv.Add(new XElement("sub", new XAttribute("loc", s), udaRow.Extract(i, v, s).ToString()));
+                                }
+                            }
+                            xf.Add(xv);
+                            */
+
+                            string val = udaRow.Extract(i, v).ToString();
+
+
+                            //replace control characters that are invalid in xml with empty string
+                            string re = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+                            val = Regex.Replace(val, re, "");
+
+                            // replace text and subtext remarks with carriage return
+                            re = @"[\xFB\xFC]";
+                            val = Regex.Replace(val, re, "\n");
+                            //const string TM_CHAR = "\xFB";
+                            //const string SM_CHAR = "\xFC";
+                            //val.Replace(SM_CHAR, "\n");
+                            //val.Replace(TM_CHAR, "\n");
+                            
+                            xf.Add(new XElement("val", new XAttribute("loc", v), val));
+                        }
+                        value = xf.ToString();
+                    }
+                }
+            }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.ToString());
+            }
+            if (null == value)
+                return DBNull.Value;
+            else
+                return value;
         }
 
         public int GetValues(object[] values)

@@ -35,5 +35,11 @@
     <Setting Name="Verbose" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="U2File" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CUST</Value>
+    </Setting>
+    <Setting Name="SqlTable" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CUST</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

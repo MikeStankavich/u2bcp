@@ -1,3 +1,104 @@
+Latest evolution - xml column per u2 location. use sql udf to slice/dice, see xvc, xvv, xvl
+
+ok, lets have a wrapper tag around each field data that tells how many values etc
+
+name each column locNNN
+
+---------
+Never mind all that. Much simpler solution. Go with XML column. 
+
+1. extend the U2 file object to expose a forward only cursor of rows
+2. Map the row data into xml as follows: for each field, make a <u2field> tag
+3. Wrap u2 data into a custom IDataReader
+4. Pass IDataReader data into SQLBulkInsert 
+
+Rather than try to guess the best way just do the top 3 or 4
+1. pivoted to rows
+2. xml by field then value
+3. xml by value then field
+4. xml colum per mv
+5. pivoted with single bitwise int for val/text/sub
+
+
+
+
+Since there is no structure enforced in U2, just get raw data the hell out of there and impose structure elsewhere. 
+Go with key value pair and be done. Do we statically define nesting or set up hierarchal P/C? Or go with XML?
+Maybe study column store schema i.e. cassandra and follow best patterns from there.
+Full pedigree of any element = File name, Row ID, Field ID [, Value ID [, Sub ID]].
+Do it denormalized first?
+
+u2_file
+file_id int not null pk
+file_name varchar(1000) not null ak1
+
+u2_row
+row_id bigint not null pk
+file_id int not null fk file ak1
+row_u2_id varchar(8000) not null ak1
+
+u2_data 
+row_id bigint not null pk
+field_id smallint not null pk
+value_id smallint not null pk default 1
+sub_id smallint not null pk default 1
+
+u2_mapping
+
+
+load the mapping. store in sql for now. build load from file or interactive gui later.
+get source table object reference
+wrap source table in custom data reader 
+get target reference?
+call bulk load
+
+
+U2 dictionary table schema, i.e. KAS.FILE - match U2 dict then add SQL fields
+----------------
+U2 File Name     PK1
+U2 Dict ID (@ID) PK2
+U2 location (LOC)
+U2 (CONV)
+U2 (MNAME)
+U2 Format (FORMAT)
+U2 MV flag (SM)
+U2 reference (ASSOC)
+SQL table
+SQL column
+SQL type
+MV separator char - NULL = row per value
+
+
+flow
+dont worry about auto import dict yet
+make it a 2 step - import dictionary or KAS FILE or whatever to a work table, then move to the EscapeU2 dictionary
+Then circle back to a dictionary import later
+also take upsert out of scope - just truncate for now
+
+connect to u2 file to ensure that it exists and has data before doing potentially destructive sql stuff
+select dictionary from sql where u2 file = <u2 file name>
+for each table
+  if table exists
+    truncate table
+  else 
+    create table
+ok now we are ready to move data
+for each row in u2 file
+  for each table in mapping
+    while mv index found
+      for each column in table
+	    call formatter 
+	    add column to insert (or data reader for bulk insert)
+	  insert the row
+
+hmm we may need to traverse for each target table if using bulk insert. will have to test speed on that
+
+column objects are mostly stupid just string int numeric datetime
+
+
+
+
+
 custom u2 uniobjects->custom idatareader->c# sqlbulkinsert
 
 object list

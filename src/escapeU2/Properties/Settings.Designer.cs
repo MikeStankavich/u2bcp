@@ -154,5 +154,29 @@ namespace escapeU2.Properties {
                 this["Verbose"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CUST")]
+        public string U2File {
+            get {
+                return ((string)(this["U2File"]));
+            }
+            set {
+                this["U2File"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CUST")]
+        public string SqlTable {
+            get {
+                return ((string)(this["SqlTable"]));
+            }
+            set {
+                this["SqlTable"] = value;
+            }
+        }
     }
 }
