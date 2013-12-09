@@ -11,131 +11,72 @@ namespace escapeU2
         // todo: create an IEnumerable method that takes a "file" name and returns row data
         // or i may need an OpenFile method then getrows with no parameter?
 
+        public U2Conn()
+        {
+            Port = "31438";
+            isConnected = false;
+        }
+
         public IEnumerable<string> GetRows(string fileName)
         {
             yield return "the end";
         }
 
-        private string host;
-        public string Host
-        {
-            get
-            {
-                return host;
-            }
-            set
-            {
-                host = value;
-            }
-        }
-        private string port = "31438";
-        public string Port
-        {
-            get
-            {
-                return port;
-            }
-            set
-            {
-                port = value;
-            }
-        }
+        public string Host { get; set; }
 
-        private string login;
-        public string Login
-        {
-            get
-            {
-                return login;
-            }
-            set
-            {
-                login = value;
-            }
-        }
+        public string Port { get; set; }
 
-        private string password;
-        public string Password
-        {
-            get
-            {
-                return password;
-            }
-            set
-            {
-                password = value;
-            }
-        }
+        public string Login { get; set; }
 
-        private string catalog;
-        public string Catalog
-        {
-            get
-            {
-                return catalog;
-            }
-            set
-            {
-                catalog = value;
-            }
-        }
+        public string Password { get; set; }
 
-        bool isconnected = false;
-        public bool isConnected
-        {
-            get
-            {
-                return isconnected;
-            }
-            set
-            {
-            }
-        }
+        public string Catalog { get; set; }
 
-        private UniSession uSession;
+        public bool isConnected { get; set; }
+
+        private UniSession _uSession;
+
         public void Connect()
         {
             // check for required props throw exception if not set
             // do i need try/catch here or just let exception bubble up/out?
             try
             {
-                uSession = UniObjects.OpenSession(host, login, password, catalog);
-                isconnected = true;
+                _uSession = UniObjects.OpenSession(Host, Login, Password, Catalog);
+                isConnected = true;
             }
             catch (UniSessionException e)
             {
-                isconnected = false;
+                isConnected = false;
                 throw;
             }
 
         }
-        public void Connect(string Host, string Login, string Password, string Catalog)
+        public void Connect(string host, string login, string password, string catalog)
         {
-            this.host = Host;
-            this.login = Login;
-            this.password = Password;
-            this.catalog = Catalog;
+            this.Host = host;
+            this.Login = login;
+            this.Password = password;
+            this.Catalog = catalog;
 
             this.Connect();
         }
 
         public void Disconnect()
         {
-            if (uSession != null && uSession.IsActive)
-            {
-                isconnected = false;
-                UniObjects.CloseSession(uSession);
-            }
+            if (_uSession == null || !_uSession.IsActive) return;
+            isConnected = false;
+            UniObjects.CloseSession(_uSession);
         }
         
         public U2DataReader GetReader(string fileName)
         {
-            return new U2DataReader(uSession, fileName);
+            return new U2DataReader(_uSession, fileName);
         }
 
         ~U2Conn()
         {
-            if (isconnected) this.Disconnect();
+            if (isConnected) this.Disconnect();
         }
     }
 }

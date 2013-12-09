@@ -3,7 +3,7 @@
   <Class Name="escapeU2.U2Conn">
     <Position X="2.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEQAAAAAACAAAAAAAAEAQIABCAAACAgCAAgQAgAAEAA=</HashCode>
+      <HashCode>AEQAAAAAAAAAAAAAAAAAQIABCAAACBACAAAQAAAAAAA=</HashCode>
       <FileName>U2Conn.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -15,13 +15,6 @@
       <FileName>SqlConn.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="escapeU2.U2File">
-    <Position X="6.25" Y="2.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAEAAAABAAAA=</HashCode>
-      <FileName>U2File.cs</FileName>
-    </TypeIdentifier>
   </Class>
   <Interface Name="escapeU2.IEU2DbConn">
     <Position X="0.5" Y="0.5" Width="1.5" />

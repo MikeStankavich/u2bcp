@@ -5,12 +5,13 @@ using System.Text;
 
 namespace escapeU2
 {
+    /*
     public class U2File
     {
         private int u2Conn;
         private int fileName;
 
-        public int U2Conn
+        public int U2Conn 
         {
             get
             {
@@ -32,4 +33,5 @@ namespace escapeU2
             }
         }
     }
+     * */
 }
