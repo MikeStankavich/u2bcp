@@ -73,7 +73,7 @@ namespace escapeU2
         }
 
         bool isconnected = false;
-        public bool isConnected
+        public bool IsConnected
         {
             get
             {
@@ -93,7 +93,7 @@ namespace escapeU2
             try
             {
                 //uSession = UniObjects.OpenSession(host, login, password, catalog);
-                string connectString = "server=" + host;
+                var connectString = "server=" + host;
                 connectString += ";user id=" + login;
                 connectString += ";password=" + password;
                 connectString += ";database=" + catalog;

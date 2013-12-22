@@ -14,7 +14,7 @@ namespace escapeU2
         public U2Conn()
         {
             Port = "31438";
-            isConnected = false;
+            IsConnected = false;
         }
 
         public IEnumerable<string> GetRows(string fileName)
@@ -32,7 +32,7 @@ namespace escapeU2
 
         public string Catalog { get; set; }
 
-        public bool isConnected { get; set; }
+        public bool IsConnected { get; set; }
 
         private UniSession _uSession;
 
@@ -43,12 +43,12 @@ namespace escapeU2
             try
             {
                 _uSession = UniObjects.OpenSession(Host, Login, Password, Catalog);
-                isConnected = true;
+                IsConnected = true;
             }
             catch (UniSessionException e)
             {
-                isConnected = false;
-                throw;
+                IsConnected = false;
+                throw e;
             }
 
         }
@@ -65,7 +65,7 @@ namespace escapeU2
         public void Disconnect()
         {
             if (_uSession == null || !_uSession.IsActive) return;
-            isConnected = false;
+            IsConnected = false;
             UniObjects.CloseSession(_uSession);
         }
         
@@ -76,7 +76,7 @@ namespace escapeU2
 
         ~U2Conn()
         {
-            if (isConnected) this.Disconnect();
+            if (IsConnected) this.Disconnect();
         }
     }
 }

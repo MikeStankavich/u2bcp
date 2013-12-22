@@ -16,6 +16,8 @@ namespace escapeU2
         private String key;
         UniDynArray udaRow;
 
+        private String[] _row;
+
         // constructor
         public U2DataReader(UniSession uSession, string fileName)
         {
@@ -23,6 +25,7 @@ namespace escapeU2
             usl = uSession.CreateUniSelectList(8);
             usl.Select(uFile);
 
+            // refactor - set a module bool to indicate first row then in Read method say if first row then first row = false else read
             // read a row to set field count, etc
             if (this.Read())
             {
@@ -36,6 +39,10 @@ namespace escapeU2
             //this.Close();
         }
 
+        private void ParseRow()
+        {
+            
+        }
         public void Close()
         {
             if (uFile.IsFileOpen)
@@ -198,11 +205,11 @@ namespace escapeU2
                     value = key;
                 else
                 {
-                    string fld = udaRow.Extract(i).ToString();
+                    var fld = udaRow.Extract(i).ToString();
                     if ("" != fld)
                     {
-                        XElement xf = new XElement("fld" /*, new XAttribute("loc", i) */);
-                        for (int v = 1; v <= udaRow.Dcount(i); v++)
+                        var xf = new XElement("fld" /*, new XAttribute("loc", i) */);
+                        for (var v = 1; v <= udaRow.Dcount(i); v++)
                         {
                             /*
                             XElement xv = new XElement("val", new XAttribute("loc", v));
@@ -217,11 +224,11 @@ namespace escapeU2
                             xf.Add(xv);
                             */
 
-                            string val = udaRow.Extract(i, v).ToString();
+                            var val = udaRow.Extract(i, v).ToString();
 
 
                             //replace control characters that are invalid in xml with empty string
-                            string re = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+                            var re = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
                             val = Regex.Replace(val, re, "");
 
                             // replace text and subtext remarks with carriage return

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace escapeU2
+﻿namespace escapeU2
 {
     public interface IEU2DbConn
     {
@@ -37,7 +32,7 @@ namespace escapeU2
             set;
         }
 
-        bool isConnected
+        bool IsConnected
         {
             get;
             set;

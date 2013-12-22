@@ -145,7 +145,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Verbose {
             get {
                 return ((bool)(this["Verbose"]));
@@ -176,6 +176,18 @@ namespace escapeU2.Properties {
             }
             set {
                 this["SqlTable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("RAW")]
+        public string SqlTableFormat {
+            get {
+                return ((string)(this["SqlTableFormat"]));
+            }
+            set {
+                this["SqlTableFormat"] = value;
             }
         }
     }

@@ -33,13 +33,16 @@
       <Value Profile="(Default)">pmsteel</Value>
     </Setting>
     <Setting Name="Verbose" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="U2File" Type="System.String" Scope="User">
       <Value Profile="(Default)">CUST</Value>
     </Setting>
     <Setting Name="SqlTable" Type="System.String" Scope="User">
       <Value Profile="(Default)">CUST</Value>
+    </Setting>
+    <Setting Name="SqlTableFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">RAW</Value>
     </Setting>
   </Settings>
 </SettingsFile>
