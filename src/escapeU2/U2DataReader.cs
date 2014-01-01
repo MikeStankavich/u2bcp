@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Data;
@@ -13,10 +14,11 @@ namespace escapeU2
     {
         private UniFile uFile;
         private UniSelectList usl;
-        private String key;
-        UniDynArray udaRow;
+        //private String key;
+        //UniDynArray udaRow;
 
-        private String[] _row;
+        private List<string> _row = new List<string>();
+        private bool _firstRow;
 
         // constructor
         public U2DataReader(UniSession uSession, string fileName)
@@ -24,14 +26,20 @@ namespace escapeU2
             uFile = uSession.CreateUniFile(fileName);
             usl = uSession.CreateUniSelectList(8);
             usl.Select(uFile);
+            
 
             // refactor - set a module bool to indicate first row then in Read method say if first row then first row = false else read
             // read a row to set field count, etc
+            _firstRow = false;
+            RecordsAffected = 0;
+
             if (this.Read())
             {
                 // reset back to the beginning of the list to align to .NET behavior
-                usl.ClearList();
-                usl.Select(uFile);
+                //usl.ClearList();
+                //usl.Select(uFile);
+                _firstRow = true;
+                // parse/transform the row
             }   
         }
         ~U2DataReader()
@@ -39,10 +47,6 @@ namespace escapeU2
             //this.Close();
         }
 
-        private void ParseRow()
-        {
-            
-        }
         public void Close()
         {
             if (uFile.IsFileOpen)
@@ -69,21 +73,120 @@ namespace escapeU2
             throw new NotImplementedException();
         }
 
+        // stop retrieving rows after reaching this limit. if zero retrieve all rows
+        public int Limit
+        {
+            get;set;
+        }
+
+        // Translate retrieved data to requested format
+        public string Format
+        {
+            get; set;
+        }
+
+
         public bool Read()
         {
-            key = "";
-            while (!usl.LastRecordRead && "" == key)
-                key = usl.Next();
 
-            if ("" != key)
-                udaRow = uFile.Read(key);
+            if (_firstRow)
+            {
+                _firstRow = false;
+            }
+            else
+            {                
+                string key = "";
 
-            return !usl.LastRecordRead;
+                while (!usl.LastRecordRead && "" == key && !_firstRow)
+                    key = usl.Next();
+
+                if ("" != key)
+                {
+                    UniDynArray udaRow = uFile.Read(key);
+
+                    _row.Clear();
+
+                    _row.Add(key);
+
+                    // if format is rawcol
+                    _row.Add(udaRow.ToString());
+
+                    /*
+                // string data = "";
+                    for (int i = 0; i < udaRow.Count(); i++)
+                    {
+                        //_row.Add(udaRow.Extract(i).ToString());
+                        data += udaRow.Extract(i).ToString();
+                    }
+                    */
+
+                    /*
+try
+{
+
+    if (0 == i)
+        value = key;
+    else
+    {
+        var fld = udaRow.Extract(i).ToString();
+        if ("" != fld)
+        {
+            var xf = new XElement("fld" / *, new XAttribute("loc", i) * /);
+            for (var v = 1; v <= udaRow.Dcount(i); v++)
+            {
+                / *
+                XElement xv = new XElement("val", new XAttribute("loc", v));
+                string val = udaRow.Extract(i, v).ToString();
+                if ("" != val)
+                {
+                    for (int s = 1; s <= udaRow.Dcount(i, v); s++)
+                    {
+                        xv.Add(new XElement("sub", new XAttribute("loc", s), udaRow.Extract(i, v, s).ToString()));
+                    }
+                }
+                xf.Add(xv);
+                * /
+
+                var val = udaRow.Extract(i, v).ToString();
+
+
+                //replace control characters that are invalid in xml with empty string
+                var re = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+                val = Regex.Replace(val, re, "");
+
+                // replace text and subtext remarks with carriage return
+                re = @"[\xFB\xFC]";
+                val = Regex.Replace(val, re, "\n");
+                //const string TM_CHAR = "\xFB";
+                //const string SM_CHAR = "\xFC";
+                //val.Replace(SM_CHAR, "\n");
+                //val.Replace(TM_CHAR, "\n");
+                            
+                xf.Add(new XElement("val", new XAttribute("loc", v), val));
+            }
+            value = xf.ToString();
+        }
+    }
+}
+catch (Exception e) 
+{
+    Console.WriteLine(e.ToString());
+}
+if (null == value)
+    return DBNull.Value;
+else
+    return value;
+ *     */
+                    RecordsAffected++;
+                }
+            }
+
+            return !usl.LastRecordRead && (Limit == 0 || (RecordsAffected) <= Limit);
         }
 
         public int RecordsAffected
         {
-            get { throw new NotImplementedException(); }
+            get;set;
         }
 
         public void Dispose()
@@ -93,7 +196,8 @@ namespace escapeU2
 
         public int FieldCount
         {
-            get { return udaRow.Dcount() + 1; }
+            // get { return udaRow.Dcount() + 1; }
+            get { return _row.Count; }
         }
 
         public bool GetBoolean(int i)
@@ -196,63 +300,7 @@ namespace escapeU2
 
         public object GetValue(int i)
         {
-            String value = null;
-
-            try
-            {
-
-                if (0 == i)
-                    value = key;
-                else
-                {
-                    var fld = udaRow.Extract(i).ToString();
-                    if ("" != fld)
-                    {
-                        var xf = new XElement("fld" /*, new XAttribute("loc", i) */);
-                        for (var v = 1; v <= udaRow.Dcount(i); v++)
-                        {
-                            /*
-                            XElement xv = new XElement("val", new XAttribute("loc", v));
-                            string val = udaRow.Extract(i, v).ToString();
-                            if ("" != val)
-                            {
-                                for (int s = 1; s <= udaRow.Dcount(i, v); s++)
-                                {
-                                    xv.Add(new XElement("sub", new XAttribute("loc", s), udaRow.Extract(i, v, s).ToString()));
-                                }
-                            }
-                            xf.Add(xv);
-                            */
-
-                            var val = udaRow.Extract(i, v).ToString();
-
-
-                            //replace control characters that are invalid in xml with empty string
-                            var re = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
-                            val = Regex.Replace(val, re, "");
-
-                            // replace text and subtext remarks with carriage return
-                            re = @"[\xFB\xFC]";
-                            val = Regex.Replace(val, re, "\n");
-                            //const string TM_CHAR = "\xFB";
-                            //const string SM_CHAR = "\xFC";
-                            //val.Replace(SM_CHAR, "\n");
-                            //val.Replace(TM_CHAR, "\n");
-                            
-                            xf.Add(new XElement("val", new XAttribute("loc", v), val));
-                        }
-                        value = xf.ToString();
-                    }
-                }
-            }
-            catch (Exception e) 
-            {
-                Console.WriteLine(e.ToString());
-            }
-            if (null == value)
-                return DBNull.Value;
-            else
-                return value;
+            return _row[i];
         }
 
         public int GetValues(object[] values)

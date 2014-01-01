@@ -17,6 +17,8 @@ namespace escapeU2
         {
             // load all propertiers from settings.app file
             this.Verbose = Properties.Settings.Default.Verbose;
+            this.Limit = Properties.Settings.Default.Limit;
+
             this.U2Host = Properties.Settings.Default.U2Host;
             this.U2Port = Properties.Settings.Default.U2Port;
             this.U2Login = Properties.Settings.Default.U2Login;
@@ -30,37 +32,49 @@ namespace escapeU2
             this.SqlPassword = Properties.Settings.Default.SqlPassword;
             this.SqlDatabase = Properties.Settings.Default.SqlDatabase;
             this.SqlTable = Properties.Settings.Default.SqlTable;
-            this.SqlTableFormat = Properties.Settings.Default.SqlTableFormat; 
+            this.SqlDictTable = Properties.Settings.Default.SqlDictTable;
+            this.SqlTableFormat = Properties.Settings.Default.SqlTableFormat;
 
+            // parse command line, override app settings when setting was passed on the command line
             CommandLine.Parser.Default.ParseArguments(args, this);
 
-            //        if (CommandLine.Parser.Default.ParseArguments(args, _options))
-            // parse command line
-            // override app settings when setting was passed on the command line
+            //default SQLTable to U2File if it isn't specified
+            //if ("" == this.SqlTable)
+            //    this.SqlTable = this.U2File;
         }
 
         public override string ToString()
         {
-            String tsout = "Verbose: " + Verbose.ToString() + "\n";
-            tsout += "U2Host: " + U2Host.ToString() + "\n";
-            tsout += "U2Login: " + U2Login.ToString() + "\n";
-            tsout += "U2Password: " + U2Password.ToString() + "\n";
-            tsout += "U2Account: " + U2Account.ToString() + "\n";
-            tsout += "U2File: " + U2File.ToString() + "\n";
+            string tsout = "";
 
-            tsout += "SqlHost: " + SqlHost.ToString() + "\n";
-            tsout += "SqlPort: " + SqlPort.ToString() + "\n";
-            tsout += "SqlLogin: " + SqlLogin.ToString() + "\n";
-            tsout += "SqlPassword: " + SqlPassword.ToString() + "\n";
-            tsout += "SqlDatabase: " + SqlDatabase.ToString() + "\n";
-            tsout += "SqlTable: " + SqlTable.ToString() + "\n";
-            tsout += "SqlTableFormat: " + SqlTableFormat.ToString() + "\n";
+            tsout += "Verbose: " + Verbose.ToString() + "\n";
+            tsout += "Format: " + SqlTableFormat + "\n";
+            tsout += "Limit: " + SqlTableFormat + "\n";
+            tsout += "Dump: " + SqlTableFormat + "\n";
+
+            tsout += "U2Host: " + U2Host + "\n";
+            tsout += "U2Login: " + U2Login + "\n";
+            tsout += "U2Password: " + U2Password + "\n";
+            tsout += "U2Account: " + U2Account + "\n";
+            tsout += "U2File: " + U2File + "\n";
+
+            tsout += "SqlHost: " + SqlHost + "\n";
+            tsout += "SqlPort: " + SqlPort + "\n";
+            tsout += "SqlLogin: " + SqlLogin + "\n";
+            tsout += "SqlPassword: " + SqlPassword + "\n";
+            tsout += "SqlDatabase: " + SqlDatabase + "\n";
+            tsout += "SqlTable: " + SqlTable + "\n";
+
+
 
             return tsout;
         }
 
         [Option('v', "verbose", DefaultValue = false, HelpText = "Prints all messages to standard output.")]
         public bool Verbose { get; set; }
+
+        [Option('l', "limit", HelpText = "Return no more than N rows.")]
+        public int Limit { get; set; }
 
         [Option("U2Host")]
         public String U2Host { get; set; }
@@ -99,70 +113,11 @@ namespace escapeU2
         [Option("SqlTable")]
         public String SqlTable { get; set; }
 
+        [Option("SqlDictTable")]
+        public String SqlDictTable { get; set; }
+
         [Option('f', "SqlTableFormat")]
         public String SqlTableFormat { get; set; }
     }
 }
 
-
-/*
-class Options {
-  [Option('r', "read", Required = true,
-    HelpText = "Input file to be processed.")]
-  public string InputFile { get; set; }
-    
-  [Option('v', "verbose", DefaultValue = true,
-    HelpText = "Prints all messages to standard output.")]
-  public bool Verbose { get; set; }
-
-  [ParserState]
-  public IParserState LastParserState { get; set; }
-
-  [HelpOption]
-  public string GetUsage() {
-    return HelpText.AutoBuild(this,
-      (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
-  }
-}
- * 
- *             <setting name="U2Host" serializeAs="String">
-                <value>pmsteel.kwyk.net</value>
-            </setting>
-            <setting name="U2Port" serializeAs="String">
-                <value>31438</value>
-            </setting>
-            <setting name="U2Login" serializeAs="String">
-                <value>administrator</value>
-            </setting>
-            <setting name="U2Password" serializeAs="String">
-                <value>H!carb0n</value>
-            </setting>
-            <setting name="U2Account" serializeAs="String">
-                <value>C:\BAI.PROD\PM</value>
-            </setting>
-            <setting name="SqlHost" serializeAs="String">
-                <value>pmsteel.kwyk.net</value>
-            </setting>
-            <setting name="SqlPort" serializeAs="String">
-                <value>1433</value>
-            </setting>
-            <setting name="SqlLogin" serializeAs="String">
-                <value>pmsteel</value>
-            </setting>
-            <setting name="SqlPassword" serializeAs="String">
-                <value>H!carb0n</value>
-            </setting>
-            <setting name="SqlDatabase" serializeAs="String">
-                <value>pmsteel</value>
-            </setting>
-            <setting name="Verbose" serializeAs="String">
-                <value>True</value>
-            </setting>
-            <setting name="U2File" serializeAs="String">
-                <value>CUST</value>
-            </setting>
-            <setting name="SqlTable" serializeAs="String">
-                <value>CUST</value>
-            </setting>
-
-*/

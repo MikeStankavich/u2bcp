@@ -78,6 +78,7 @@
     <Compile Include="SqlConn.cs" />
     <Compile Include="U2Conn.cs" />
     <Compile Include="U2DataReader.cs" />
+    <Compile Include="U2DictReader.cs" />
     <Compile Include="U2File.cs" />
   </ItemGroup>
   <ItemGroup>

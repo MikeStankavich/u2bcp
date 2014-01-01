@@ -190,5 +190,29 @@ namespace escapeU2.Properties {
                 this["SqlTableFormat"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int Limit {
+            get {
+                return ((int)(this["Limit"]));
+            }
+            set {
+                this["Limit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CUST_DICT")]
+        public string SqlDictTable {
+            get {
+                return ((string)(this["SqlDictTable"]));
+            }
+            set {
+                this["SqlDictTable"] = value;
+            }
+        }
     }
 }

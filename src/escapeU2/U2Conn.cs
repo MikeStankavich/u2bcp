@@ -68,10 +68,15 @@ namespace escapeU2
             IsConnected = false;
             UniObjects.CloseSession(_uSession);
         }
-        
+
         public U2DataReader GetReader(string fileName)
         {
             return new U2DataReader(_uSession, fileName);
+        }
+
+        public U2DictReader GetDictReader(string fileName)
+        {
+            return new U2DictReader(_uSession, fileName);
         }
 
         ~U2Conn()

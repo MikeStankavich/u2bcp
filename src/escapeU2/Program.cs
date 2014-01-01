@@ -16,16 +16,25 @@ namespace escapeU2
 
             if (_options.Verbose) Console.WriteLine(_options.ToString());
             
-
-
             try
             {
                 var srcConn = new U2Conn();
                 srcConn.Connect(_options.U2Host, _options.U2Login, _options.U2Password, _options.U2Account);
                 var srcReader = srcConn.GetReader(_options.U2File);
+                srcReader.Limit = _options.Limit;
 
-
-                var connectString =  string.Format("Server={0};User Id={1};Password={2};;Database={3};"
+                var srcDictReader = srcConn.GetDictReader(_options.U2File);
+                /*
+                while (srcDictReader.Read())
+                {
+                    for (int i = 0; i < srcDictReader.FieldCount; i++)
+                    {
+                        Console.Write(srcDictReader.GetValue(i).ToString() + '^');
+                    }
+                    Console.Write('\n');
+                }
+                */
+                var connectString = string.Format("Server={0};User Id={1};Password={2};;Database={3};"
                                              , _options.SqlHost // "pmsteel.kwyk.net"
                                              , _options.SqlLogin  // "pmsteel"
                                              , _options.SqlPassword // "H!carb0n"
@@ -34,22 +43,81 @@ namespace escapeU2
                 var destConn = new SqlConnection(connectString);
                 destConn.Open();
 
-                using (var cmd = destConn.CreateCommand())
+                if ("" != _options.SqlDictTable)
                 {
-                    cmd.CommandText = "exec prc_prep_table '" + _options.SqlTable + "', " + srcReader.FieldCount;
-                    cmd.ExecuteNonQuery();
+                    using (var bulkCopy = new SqlBulkCopy(destConn))
+                    {
+                        bulkCopy.DestinationTableName = _options.SqlDictTable;
+                        bulkCopy.BatchSize = 100;
+                        bulkCopy.NotifyAfter = 100;
+                        // Set up the event handler to notify after 50 rows.
+                        //bulkCopy.SqlRowsCopied += new SqlRowsCopiedEventHandler(OnSqlRowsCopied);
+                        bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
+                        bulkCopy.WriteToServer(srcDictReader);
+                    }
+                    if (_options.Verbose)
+                        Console.WriteLine("Copied {0} rows to {1}", srcDictReader.RecordsAffected, _options.SqlDictTable);
                 }
+/*
+                if (false) // sub in dump to stdout flag
+                {
+                    while (srcReader.Read())
+                    {
+                        for (int i = 0; i < srcReader.FieldCount; i++)
+                        {
+                            Console.Write(srcReader.GetValue(i).ToString() + '^');
+                        }
+                        Console.Write('\n');
+                    }
+                }
+                else
+ */
+               {
+                    using (var bulkCopy = new SqlBulkCopy(destConn))
+                    {
+                        bulkCopy.DestinationTableName = _options.SqlTable;
+                        bulkCopy.BatchSize = 100;
+                        bulkCopy.NotifyAfter = 100;
+                        // Set up the event handler to notify after 50 rows.
+                        //bulkCopy.SqlRowsCopied += new SqlRowsCopiedEventHandler(OnSqlRowsCopied);
+                        bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
+                        //bulkCopy.WriteToServer(srcReader);
+                    }
+                }
+
+                Console.ReadKey();
                 
-                using (var bulkCopy = new SqlBulkCopy(destConn))
-                {
-                    bulkCopy.DestinationTableName = _options.SqlTable;
-                    bulkCopy.BatchSize = 100;
-                    bulkCopy.NotifyAfter = 100;
-                    // Set up the event handler to notify after 50 rows.
-                    //bulkCopy.SqlRowsCopied += new SqlRowsCopiedEventHandler(OnSqlRowsCopied);
-                    bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
-                    bulkCopy.WriteToServer(srcReader);
-                }
+                /*
+                                else
+                                {
+
+                                    var connectString =  string.Format("Server={0};User Id={1};Password={2};;Database={3};"
+                                                                 , _options.SqlHost // "pmsteel.kwyk.net"
+                                                                 , _options.SqlLogin  // "pmsteel"
+                                                                 , _options.SqlPassword // "H!carb0n"
+                                                                 , _options.SqlDatabase // "pmsteel"
+                                                                 );
+                                    var destConn = new SqlConnection(connectString);
+                                    destConn.Open();
+
+                                    using (var cmd = destConn.CreateCommand())
+                                    {
+                                        cmd.CommandText = "exec prc_prep_table '" + _options.SqlTable + "', " + srcReader.FieldCount;
+                                        cmd.ExecuteNonQuery();
+                                    }
+
+                                    using (var bulkCopy = new SqlBulkCopy(destConn))
+                                    {
+                                        bulkCopy.DestinationTableName = _options.SqlTable;
+                                        bulkCopy.BatchSize = 100;
+                                        bulkCopy.NotifyAfter = 100;
+                                        // Set up the event handler to notify after 50 rows.
+                                        //bulkCopy.SqlRowsCopied += new SqlRowsCopiedEventHandler(OnSqlRowsCopied);
+                                        bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
+                                        bulkCopy.WriteToServer(srcReader);
+                                    }
+                                }
+                                */
 
                 srcReader.Close();
 
