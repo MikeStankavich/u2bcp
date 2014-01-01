@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Data;
-using System.Xml.Linq;
 using IBMU2.UODOTNET;
 
 namespace escapeU2
@@ -20,66 +14,17 @@ namespace escapeU2
         private int _rowIdx = 0;
 
         private List<string> _row = new List<string>();
-        private bool _firstRow;
-        /*
-        private void ReadDataset()
-        {
-            _keys = new string[1000];
 
-            for (int i = 0; i < 1000; i++)
-            {
-                string key = "";
-
-                while (!usl.LastRecordRead && "" == key)
-                    key = usl.Next();
-
-                //if ("" != key)
-                keys[i] = key;
-
-                Console.WriteLine(keys[i]);
-
-                if (usl.LastRecordRead)
-                {
-                    Array.Resize(ref keys, i + 1);
-                    break;
-                }
-            }
-
-
-            uds = uFile.ReadRecords(_keys);
-
-        }
-        */
         // constructor
         public U2DictReader(UniSession uSession, string fileName)
         {
             uFile = uSession.CreateUniDictionary(fileName);
-            //usl = uSession.CreateUniSelectList(8);
-            //usl.Select(uFile);
-
-            /*
-            string cmdTxt = string.Format("SELECT {0} BY @ID SAMPLED 100", fileName);
-            UniCommand uCmd = uSession.CreateUniCommand(); //By default the results of this will become select list 0.
-            uCmd.Command = cmdTxt;
-            uCmd.Execute();
-            */
+        
             usl = uSession.CreateUniSelectList(0);
             usl.Select(uFile);
             string[] keys = usl.ReadListAsStringArray();
 
-            /*
-            foreach (string str in keys)
-                Console.WriteLine(str);
-            */
-
-            RecordsAffected = 0;
-            // have to read the first row to get the field count. We use _firstRow to tell Read that first row already read
-            //_firstRow = this.Read();
-
-            uds = uFile.ReadRecords(keys);
-            if (uds.RowCount > 0)
-                _rowIdx = 0;
-            
+            uds = uFile.ReadRecords(keys);  
         }
         ~U2DictReader()
         {
@@ -112,24 +57,9 @@ namespace escapeU2
             throw new NotImplementedException();
         }
 
-        // stop retrieving rows after reaching this limit. if zero retrieve all rows
-        public int Limit
-        {
-            get;
-            set;
-        }
-
-        // Translate retrieved data to requested format
-        public string Format
-        {
-            get;
-            set;
-        }
-
-
         public bool Read()
         {
-            if (_rowIdx <= uds.RowCount)
+            if (_rowIdx < uds.RowCount)
             {
                 UniRecord urRow = uds.GetRecord(_rowIdx);
 
@@ -140,17 +70,19 @@ namespace escapeU2
                 for (int colIdx = 1; colIdx < 8; colIdx++)
                     _row.Add(urRow.Record.Extract(colIdx).ToString());
                 
-                RecordsAffected++;
                 _rowIdx++;
-            }
 
-            return (_rowIdx <= uds.RowCount);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public int RecordsAffected
         {
-            get;
-            set;
+            get { return _rowIdx; }
         }
 
         public void Dispose()
