@@ -193,7 +193,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100000")]
         public int Limit {
             get {
                 return ((int)(this["Limit"]));
@@ -205,7 +205,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CUST_DICT")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string SqlDictTable {
             get {
                 return ((string)(this["SqlDictTable"]));

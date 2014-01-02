@@ -9,8 +9,7 @@ namespace escapeU2
     {
         private UniDictionary uFile;
         private UniSelectList usl;
-        private UniDataSet uds;
-        private string[] _keys;
+        private UniDataSet _uds;
         private int _rowIdx = 0;
 
         private List<string> _row = new List<string>();
@@ -24,7 +23,7 @@ namespace escapeU2
             usl.Select(uFile);
             string[] keys = usl.ReadListAsStringArray();
 
-            uds = uFile.ReadRecords(keys);  
+            _uds = uFile.ReadRecords(keys);  
         }
         ~U2DictReader()
         {
@@ -59,9 +58,9 @@ namespace escapeU2
 
         public bool Read()
         {
-            if (_rowIdx < uds.RowCount)
+            if (_rowIdx < _uds.RowCount)
             {
-                UniRecord urRow = uds.GetRecord(_rowIdx);
+                UniRecord urRow = _uds.GetRecord(_rowIdx);
 
                 _row.Clear();
 

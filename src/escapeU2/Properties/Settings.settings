@@ -45,10 +45,10 @@
       <Value Profile="(Default)">RAW</Value>
     </Setting>
     <Setting Name="Limit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">100000</Value>
     </Setting>
     <Setting Name="SqlDictTable" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CUST_DICT</Value>
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

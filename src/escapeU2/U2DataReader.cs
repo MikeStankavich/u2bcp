@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,35 +13,37 @@ namespace escapeU2
 {
     public class U2DataReader : IDataReader
     {
+        private UniSession _uSession;
         private UniFile uFile;
         private UniSelectList usl;
-        //private String key;
-        //UniDynArray udaRow;
+        private UniDataSet _uds;
 
+        private string[] _keySample;
+        private string[] _keyBlock;
         private List<string> _row = new List<string>();
         private bool _firstRow;
+        private int _blockIdx = 0;
+        private int _rowIdx = 0;
 
         // constructor
         public U2DataReader(UniSession uSession, string fileName)
         {
-            uFile = uSession.CreateUniFile(fileName);
-            usl = uSession.CreateUniSelectList(8);
-            usl.Select(uFile);
-            
+            _uSession = uSession;
+            uFile = _uSession.CreateUniFile(fileName);
 
-            // refactor - set a module bool to indicate first row then in Read method say if first row then first row = false else read
-            // read a row to set field count, etc
-            _firstRow = false;
+            UniCommand uCmd = uSession.CreateUniCommand();
+            uCmd.Command = string.Format("SELECT {0} BY @ID SAMPLED 100", uFile.FileName);
+            uCmd.Execute();
+            usl = uSession.CreateUniSelectList(0);
+            _keySample = usl.ReadListAsStringArray();
+
+            //foreach (string k in _keySample)
+            //    Console.WriteLine(k);
+
             RecordsAffected = 0;
 
-            if (this.Read())
-            {
-                // reset back to the beginning of the list to align to .NET behavior
-                //usl.ClearList();
-                //usl.Select(uFile);
-                _firstRow = true;
-                // parse/transform the row
-            }   
+
+            _uds = uFile.ReadRecords(_keySample); 
         }
         ~U2DataReader()
         {
@@ -88,12 +91,63 @@ namespace escapeU2
 
         public bool Read()
         {
+            if ((_blockIdx > _keySample.Length) || (Limit > 0 && RecordsAffected >= Limit))
+                return false;
 
-            if (_firstRow)
+            if (0 == _rowIdx)
             {
-                _firstRow = false;
+                UniCommand uCmd = _uSession.CreateUniCommand();
+
+                uCmd.Command = string.Format("SELECT {0} BY @ID", uFile.FileName);
+
+                if (_blockIdx > 0)
+                    uCmd.Command += string.Format(" WITH @ID >= \"{0}\"", _keySample[_blockIdx - 1]);
+
+
+                if (_blockIdx < _keySample.Length)
+                {
+                    if (_blockIdx > 0)
+                        uCmd.Command += " AND ";
+                    else
+                        uCmd.Command += " WITH ";
+
+                    uCmd.Command += string.Format("@ID < \"{0}\"", _keySample[_blockIdx]);
+                }
+
+                //Console.WriteLine(uCmd.Command);
+
+                uCmd.Execute();
+                usl = _uSession.CreateUniSelectList(0);
+                _keyBlock = usl.ReadListAsStringArray();
+
+                _uds = uFile.ReadRecords(_keyBlock);
+                //foreach (string k in _keyBlock)
+                //    Console.WriteLine(k);
             }
-            else
+            if (_keyBlock[_rowIdx] == "SAMPLE")
+                Console.WriteLine("Stop here");
+
+            if (_rowIdx < _keyBlock.Length)
+            {
+                _row.Clear();
+
+                _row.Add(_keyBlock[_rowIdx]);
+                _row.Add(_uds.GetRecord(_rowIdx).Record.ToString());
+
+                _rowIdx++;
+                if (_rowIdx == _keyBlock.Length)
+                {
+                    _rowIdx = 0;
+                    _blockIdx++;
+                }
+            }
+
+            RecordsAffected++;
+    
+            return true;
+
+            /*
+            if(false)
             {                
                 string key = "";
 
@@ -177,11 +231,6 @@ if (null == value)
 else
     return value;
  *     */
-                    RecordsAffected++;
-                }
-            }
-
-            return !usl.LastRecordRead && (Limit == 0 || (RecordsAffected) <= Limit);
         }
 
         public int RecordsAffected
@@ -197,7 +246,7 @@ else
         public int FieldCount
         {
             // get { return udaRow.Dcount() + 1; }
-            get { return _row.Count; }
+            get { return 2; }
         }
 
         public bool GetBoolean(int i)
