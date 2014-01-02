@@ -21,7 +21,6 @@ namespace escapeU2
         private string[] _keySample;
         private string[] _keyBlock;
         private List<string> _row = new List<string>();
-        private bool _firstRow;
         private int _blockIdx = 0;
         private int _rowIdx = 0;
 
@@ -37,13 +36,7 @@ namespace escapeU2
             usl = uSession.CreateUniSelectList(0);
             _keySample = usl.ReadListAsStringArray();
 
-            //foreach (string k in _keySample)
-            //    Console.WriteLine(k);
-
             RecordsAffected = 0;
-
-
-            _uds = uFile.ReadRecords(_keySample); 
         }
         ~U2DataReader()
         {
@@ -101,7 +94,7 @@ namespace escapeU2
                 uCmd.Command = string.Format("SELECT {0} BY @ID", uFile.FileName);
 
                 if (_blockIdx > 0)
-                    uCmd.Command += string.Format(" WITH @ID >= \"{0}\"", _keySample[_blockIdx - 1]);
+                    uCmd.Command += string.Format(" WITH @ID >= \"{0}\"", _keySample[_blockIdx - 1].Replace("\"", "\"\""));
 
 
                 if (_blockIdx < _keySample.Length)
@@ -111,26 +104,20 @@ namespace escapeU2
                     else
                         uCmd.Command += " WITH ";
 
-                    uCmd.Command += string.Format("@ID < \"{0}\"", _keySample[_blockIdx]);
+                    uCmd.Command += string.Format("@ID < \"{0}\"", _keySample[_blockIdx].Replace("\"", "\"\""));
                 }
-
-                //Console.WriteLine(uCmd.Command);
 
                 uCmd.Execute();
                 usl = _uSession.CreateUniSelectList(0);
                 _keyBlock = usl.ReadListAsStringArray();
 
                 _uds = uFile.ReadRecords(_keyBlock);
-                //foreach (string k in _keyBlock)
-                //    Console.WriteLine(k);
             }
-            if (_keyBlock[_rowIdx] == "SAMPLE")
-                Console.WriteLine("Stop here");
 
             if (_rowIdx < _keyBlock.Length)
             {
                 _row.Clear();
-
+  
                 _row.Add(_keyBlock[_rowIdx]);
                 _row.Add(_uds.GetRecord(_rowIdx).Record.ToString());
 
@@ -146,33 +133,8 @@ namespace escapeU2
     
             return true;
 
-            /*
-            if(false)
-            {                
-                string key = "";
 
-                while (!usl.LastRecordRead && "" == key && !_firstRow)
-                    key = usl.Next();
 
-                if ("" != key)
-                {
-                    UniDynArray udaRow = uFile.Read(key);
-
-                    _row.Clear();
-
-                    _row.Add(key);
-
-                    // if format is rawcol
-                    _row.Add(udaRow.ToString());
-
-                    /*
-                // string data = "";
-                    for (int i = 0; i < udaRow.Count(); i++)
-                    {
-                        //_row.Add(udaRow.Extract(i).ToString());
-                        data += udaRow.Extract(i).ToString();
-                    }
-                    */
 
                     /*
 try
