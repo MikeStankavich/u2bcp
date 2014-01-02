@@ -33,6 +33,7 @@ namespace escapeU2
             this.SqlDatabase = Properties.Settings.Default.SqlDatabase;
             this.SqlTable = Properties.Settings.Default.SqlTable;
             this.SqlDictTable = Properties.Settings.Default.SqlDictTable;
+            this.SqlTableAction = Properties.Settings.Default.SqlTableAction;
             this.SqlTableFormat = Properties.Settings.Default.SqlTableFormat;
 
             // parse command line, override app settings when setting was passed on the command line
@@ -64,6 +65,8 @@ namespace escapeU2
             tsout += "SqlPassword: " + SqlPassword + "\n";
             tsout += "SqlDatabase: " + SqlDatabase + "\n";
             tsout += "SqlTable: " + SqlTable + "\n";
+            tsout += "SqlDictTable: " + SqlDictTable + "\n";
+            tsout += "SqlTableAction: " + SqlTableAction + "\n";
 
 
 
@@ -115,6 +118,9 @@ namespace escapeU2
 
         [Option("SqlDictTable")]
         public String SqlDictTable { get; set; }
+
+        [Option("SqlTableAction")]
+        public String SqlTableAction { get; set; }
 
         [Option('f', "SqlTableFormat")]
         public String SqlTableFormat { get; set; }

@@ -205,13 +205,25 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("CUST_DICT")]
         public string SqlDictTable {
             get {
                 return ((string)(this["SqlDictTable"]));
             }
             set {
                 this["SqlDictTable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Overwrite")]
+        public string SqlTableAction {
+            get {
+                return ((string)(this["SqlTableAction"]));
+            }
+            set {
+                this["SqlTableAction"] = value;
             }
         }
     }

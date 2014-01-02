@@ -30,11 +30,14 @@ namespace escapeU2
                 var destConn = new SqlConnection(connectString);
                 destConn.Open();
 
+                
 
                 if ("" != _options.SqlDictTable)
                 {
                     var srcDictReader = srcConn.GetDictReader(_options.U2File);
-                    
+
+                    SqlTableAction(destConn, _options.SqlTableAction, _options.SqlDictTable, "dictionary");
+
                     using (var bulkCopy = new SqlBulkCopy(destConn))
                     {
                         bulkCopy.DestinationTableName = _options.SqlDictTable;
@@ -43,8 +46,7 @@ namespace escapeU2
                         bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
                         bulkCopy.WriteToServer(srcDictReader);
                     }
-                    if (_options.Verbose)
-                        Console.WriteLine("Copied {0} rows to {1}", srcDictReader.RecordsAffected, _options.SqlDictTable);
+                    Console.WriteLine("Copied {0} rows to {1}", srcDictReader.RecordsAffected, _options.SqlDictTable);
                 }
 
                 var srcReader = srcConn.GetReader(_options.U2File);
@@ -60,7 +62,9 @@ namespace escapeU2
                     Console.Write('\n');
                 }
                 */
-            
+
+                SqlTableAction(destConn, _options.SqlTableAction, _options.SqlTable, _options.SqlTableFormat);
+
                 using (var bulkCopy = new SqlBulkCopy(destConn))
                 {
                     bulkCopy.DestinationTableName = _options.SqlTable;
@@ -69,8 +73,7 @@ namespace escapeU2
                     bulkCopy.SqlRowsCopied += OnSqlRowsCopied;
                     bulkCopy.WriteToServer(srcReader);
                 }
-                if (_options.Verbose)
-                    Console.WriteLine("Copied {0} rows to {1}", srcReader.RecordsAffected, _options.SqlTable);
+                Console.WriteLine("Copied {0} rows to {1}", srcReader.RecordsAffected, _options.SqlTable);
 
                 if (_options.Verbose)
                 {
@@ -127,6 +130,57 @@ namespace escapeU2
                 Console.WriteLine("Copied {0} so far...", e.RowsCopied);
         }
 
+        private static bool SqlTableAction(SqlConnection sqlConn, string tableAction, string tableName, string tableFormat)
+        {
+
+            using(SqlCommand sqlCmd = sqlConn.CreateCommand())
+            {
+                switch (tableAction.ToLower())
+                {
+                    case "truncate":
+                        sqlCmd.CommandText = string.Format("TRUNCATE TABLE {0}", tableName);
+                        if (_options.Verbose)
+                            Console.WriteLine(sqlCmd.CommandText);
+                        sqlCmd.ExecuteNonQuery();
+                        break;
+
+                    case "overwrite":
+                        sqlCmd.CommandText = string.Format("IF OBJECT_ID('{0}') IS NOT NULL DROP TABLE {0}", tableName);
+                        if (_options.Verbose)
+                            Console.WriteLine(sqlCmd.CommandText);
+                        sqlCmd.ExecuteNonQuery();
+                        goto case "create";
+
+                    case "create":
+                        switch (tableFormat.ToLower())
+                        {
+                            case "raw":
+                                sqlCmd.CommandText =
+                                    string.Format(
+                                        "CREATE TABLE {0} (id VARCHAR(900) NOT NULL PRIMARY KEY, data VARCHAR(MAX) NULL)"
+                                        , tableName);
+                                break;
+
+                            case "dictionary":
+                                sqlCmd.CommandText = string.Format("CREATE TABLE {0} (" +
+                                                                   "   id varchar(20) NOT NULL, /* primary key, */" +
+                                                                   "   typ varchar(20) NOT NULL," +
+                                                                   "   loc varchar(255) NOT NULL," +
+                                                                   "   conv varchar(50) NOT NULL," +
+                                                                   "   mname varchar(50) NOT NULL," +
+                                                                   "   fmt varchar(50) NOT NULL," +
+                                                                   "   sm varchar(50) NOT NULL," +
+                                                                   "	assoc varchar(50) NOT NULL)", tableName);
+                                break;
+                        }
+                        if (_options.Verbose)
+                            Console.WriteLine(sqlCmd.CommandText);
+                        sqlCmd.ExecuteNonQuery();
+                        break;
+                }
+            }
+            return true;
+        }
 
        
     }
