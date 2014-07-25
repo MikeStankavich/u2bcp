@@ -36,19 +36,19 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="U2File" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CUST</Value>
+      <Value Profile="(Default)">AUDIT1</Value>
     </Setting>
     <Setting Name="SqlTable" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CUST</Value>
+      <Value Profile="(Default)">AUDIT1</Value>
     </Setting>
     <Setting Name="SqlTableFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)">RAW</Value>
     </Setting>
     <Setting Name="Limit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">100000</Value>
+      <Value Profile="(Default)">10000000</Value>
     </Setting>
     <Setting Name="SqlDictTable" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CUST_DICT</Value>
+      <Value Profile="(Default)">AUDIT1_DICT</Value>
     </Setting>
     <Setting Name="SqlTableAction" Type="System.String" Scope="User">
       <Value Profile="(Default)">Overwrite</Value>

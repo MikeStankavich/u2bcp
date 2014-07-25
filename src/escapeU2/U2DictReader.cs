@@ -7,6 +7,7 @@ namespace escapeU2
 {
     public class U2DictReader : IDataReader
     {
+        private UniSession _uSession;
         private UniDictionary uFile;
         private UniSelectList usl;
         private UniDataSet _uds;
@@ -17,13 +18,30 @@ namespace escapeU2
         // constructor
         public U2DictReader(UniSession uSession, string fileName)
         {
-            uFile = uSession.CreateUniDictionary(fileName);
-        
-            usl = uSession.CreateUniSelectList(0);
-            usl.Select(uFile);
-            string[] keys = usl.ReadListAsStringArray();
+            _uSession = uSession;
 
-            _uds = uFile.ReadRecords(keys);  
+            try
+            {
+                uFile = _uSession.CreateUniDictionary(fileName);
+
+                usl = _uSession.CreateUniSelectList(0);
+                usl.Select(uFile);
+                string[] keys = usl.ReadListAsStringArray();
+
+                _uds = uFile.ReadRecords(keys);
+            }
+            catch (UniSessionException e)   // unisession file not exists
+            {
+                if (e.ErrorCode == 14002)
+                {
+                    Console.WriteLine("U2 file not found");
+                }
+                else
+                {
+                    // dont know, so rethrow
+                    throw;
+                }
+            }
         }
         ~U2DictReader()
         {
@@ -32,8 +50,9 @@ namespace escapeU2
 
         public void Close()
         {
-            if (uFile.IsFileOpen)
-                uFile.Close();
+            if (uFile != null)
+                if (uFile.IsFileOpen)
+                    uFile.Close();
         }
 
         public int Depth
@@ -58,6 +77,9 @@ namespace escapeU2
 
         public bool Read()
         {
+            if (_uds == null) 
+                return false;
+
             if (_rowIdx < _uds.RowCount)
             {
                 UniRecord urRow = _uds.GetRecord(_rowIdx);

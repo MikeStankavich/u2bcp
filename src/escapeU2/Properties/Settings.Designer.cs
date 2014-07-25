@@ -157,7 +157,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CUST")]
+        [global::System.Configuration.DefaultSettingValueAttribute("AUDIT1")]
         public string U2File {
             get {
                 return ((string)(this["U2File"]));
@@ -169,7 +169,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CUST")]
+        [global::System.Configuration.DefaultSettingValueAttribute("AUDIT1")]
         public string SqlTable {
             get {
                 return ((string)(this["SqlTable"]));
@@ -193,7 +193,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000000")]
         public int Limit {
             get {
                 return ((int)(this["Limit"]));
@@ -205,7 +205,7 @@ namespace escapeU2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CUST_DICT")]
+        [global::System.Configuration.DefaultSettingValueAttribute("AUDIT1_DICT")]
         public string SqlDictTable {
             get {
                 return ((string)(this["SqlDictTable"]));

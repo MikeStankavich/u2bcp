@@ -28,15 +28,31 @@ namespace escapeU2
         public U2DataReader(UniSession uSession, string fileName)
         {
             _uSession = uSession;
-            uFile = _uSession.CreateUniFile(fileName);
 
-            UniCommand uCmd = uSession.CreateUniCommand();
-            uCmd.Command = string.Format("SELECT {0} BY @ID SAMPLED 100", uFile.FileName);
-            uCmd.Execute();
-            usl = uSession.CreateUniSelectList(0);
-            _keySample = usl.ReadListAsStringArray();
+            try
+            {
+                uFile = _uSession.CreateUniFile(fileName);
 
-            RecordsAffected = 0;
+                UniCommand uCmd = _uSession.CreateUniCommand();
+                uCmd.Command = string.Format("SELECT {0} BY @ID SAMPLED 100", uFile.FileName);
+                uCmd.Execute();
+                usl = _uSession.CreateUniSelectList(0);
+                _keySample = usl.ReadListAsStringArray();
+
+                RecordsAffected = 0;
+            }
+            catch(UniSessionException e)   // unisession file not exists
+            {
+                if (e.ErrorCode == 14002)
+                {
+                    Console.WriteLine("U2 file not found");
+                }
+                else
+                {
+                    // dont know, so rethrow
+                    throw;
+                }
+            }
         }
         ~U2DataReader()
         {
@@ -45,8 +61,9 @@ namespace escapeU2
 
         public void Close()
         {
-            if (uFile.IsFileOpen)
-                uFile.Close();
+            if (uFile!=null)
+                if (uFile.IsFileOpen)
+                    uFile.Close();
         }
 
         public int Depth
@@ -84,6 +101,9 @@ namespace escapeU2
 
         public bool Read()
         {
+            if (_keySample == null)
+                return false;
+
             if ((_blockIdx > _keySample.Length) || (Limit > 0 && RecordsAffected >= Limit))
                 return false;
 
@@ -91,26 +111,32 @@ namespace escapeU2
             {
                 UniCommand uCmd = _uSession.CreateUniCommand();
 
-                uCmd.Command = string.Format("SELECT {0} BY @ID", uFile.FileName);
-
-                if (_blockIdx > 0)
-                    uCmd.Command += string.Format(" WITH @ID >= \"{0}\"", _keySample[_blockIdx - 1].Replace("\"", "\"\""));
-
-
-                if (_blockIdx < _keySample.Length)
+                _keyBlock = null;
+                while (_keyBlock == null)
                 {
+                    uCmd.Command = string.Format("SELECT {0} BY @ID", uFile.FileName);
+
                     if (_blockIdx > 0)
-                        uCmd.Command += " AND ";
-                    else
-                        uCmd.Command += " WITH ";
+                        uCmd.Command += string.Format(" WITH @ID >= \"{0}\"",
+                            _keySample[_blockIdx - 1].Replace("\"", "\"\""));
 
-                    uCmd.Command += string.Format("@ID < \"{0}\"", _keySample[_blockIdx].Replace("\"", "\"\""));
+
+                    if (_blockIdx < _keySample.Length)
+                    {
+                        if (_blockIdx > 0)
+                            uCmd.Command += " AND ";
+                        else
+                            uCmd.Command += " WITH ";
+
+                        uCmd.Command += string.Format("@ID < \"{0}\"", _keySample[_blockIdx].Replace("\"", "\"\""));
+                    }
+
+                    uCmd.Execute();
+                    usl = _uSession.CreateUniSelectList(0);
+                    _keyBlock = usl.ReadListAsStringArray();
+                    if (_keyBlock == null) _blockIdx++;
                 }
-
-                uCmd.Execute();
-                usl = _uSession.CreateUniSelectList(0);
-                _keyBlock = usl.ReadListAsStringArray();
-
+                // Console.Write(_keyBlock.ToString());
                 _uds = uFile.ReadRecords(_keyBlock);
             }
 
